@@ -1,0 +1,68 @@
+name: Build and release extension
+
+on:
+  push:
+    tags:
+    - '*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build extension
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22.x"
+    - name: Install web-ext
+      run: npm install --global web-ext
+    - name: Build extension
+      run: web-ext build --artifacts-dir dist
+    - name: Sign extension
+      run: web-ext sign --channel unlisted
+      env:
+        WEB_EXT_API_KEY: ${{ secrets.MOZILLA_API_KEY }}
+        WEB_EXT_API_SECRET: ${{ secrets.MOZILLA_API_SECRET }}
+    - name: Store extension artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: extension-distributions
+        path: dist/
+
+  github-release:
+    name: Upload to GitHub release
+    needs:
+    - build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # IMPORTANT: mandatory for making GitHub Releases
+      id-token: write  # IMPORTANT: mandatory for sigstore
+
+    steps:
+    - name: Download dists
+      uses: actions/download-artifact@v4
+      with:
+        name: extension-distributions
+        path: dist/
+    - name: Create GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: >-
+        gh release create
+        '${{ github.ref_name }}'
+        --repo '${{ github.repository }}'
+        --notes ""
+    - name: Upload artifact signatures to GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      # Upload to GitHub Release using the `gh` CLI.
+      # `dist/` contains the built packages, and the
+      # sigstore-produced signatures and certificates.
+      run: >-
+        gh release upload
+        '${{ github.ref_name }}' dist/**
+        --repo '${{ github.repository }}'

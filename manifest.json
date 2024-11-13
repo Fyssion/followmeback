@@ -1,0 +1,27 @@
+{
+	"manifest_version": 2,
+	"name": "Follow Me Back",
+	"description": "See who doesn't follow you back on Instagram.",
+	"version": "0.2.0",
+	"license": "MPL-2.0",
+	"icons": {
+		"64": "icons/icon.png"
+	},
+	"browser_action": {
+		"default_icon": {
+			"64": "icons/icon.png"
+		},
+		"default_popup": "action/index.html",
+		"default_title": "Follow Me Back"
+	},
+	"permissions": [
+    	"activeTab",
+		"storage",
+		"scripting"
+  	],
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "{13633b5f-c023-4423-9a88-f1fb875d8c74}"
+		}
+	}
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/vendor/bootstrap.css" rel="stylesheet">
+    <style>
+      body {
+        min-width: 300px;
+        max-width:  20rem;
+        padding: 1rem;
+      }
+      .hidden {
+        display: none;
+      }
+      details summary {
+        cursor: pointer;
+        padding: 0.5rem 0;
+      }
+      #followmeback-result ul {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="followmeback" class="container-fluid p-0">
+      <h1 class="h4 mb-3">Follow Me Back</h1>
+
+      <details class="mb-3">
+        <summary class="text-primary fw-semibold">Click to see usage instructions</summary>
+        <div class="card mt-2">
+          <div class="card-body">
+            <p class="small text-muted">
+              This is a browser extension to show you who doesn't follow you back on Instagram.
+              It doesn't require any use of the Instagram API, so you won't get banned for automating
+              your account or using 3rd party apps. Everything is scraped directly from the page.
+            </p>
+            <h3 class="h6 fw-bold">How to use</h3>
+            <ol class="small ps-3">
+              <li>Open your profile on Instagram (or any profile where you can see follower/following lists)</li>
+              <li>Click on the Followers list and scroll to bottom</li>
+              <li>Click on the extension icon and click "Detect followers"</li>
+              <li>Repeat steps 2 and 3 but for the Following list</li>
+            </ol>
+          </div>
+        </div>
+      </details>
+
+      <div class="d-grid gap-2 mb-3">
+        <button id="detectFollowers" class="btn btn-primary">Detect Followers</button>
+        <button id="detectFollowing" class="btn btn-secondary">Detect Following</button>
+      </div>
+    </div>
+
+    <div id="followmeback-result">
+      <div class="alert alert-info py-2 mb-3">
+        <div class="row g-0">
+          <div class="col">
+            <small>Detected followers: <span id="detectedFollowers" class="fw-bold">N/A</span></small>
+          </div>
+          <div class="col">
+            <small>Detected following: <span id="detectedFollowing" class="fw-bold">N/A</span></small>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <h3 class="h6 fw-bold mb-2">Doesn't follow back</h3>
+        <ul id="noFollowBack" class="list-group list-group-flush small"></ul>
+      </div>
+
+      <div>
+        <h3 class="h6 fw-bold mb-2">You don't follow back</h3>
+        <ul id="youNoFollowBack" class="list-group list-group-flush small"></ul>
+      </div>
+    </div>
+
+    <div id="followmeback-error" class="hidden">
+      <div class="alert alert-danger">
+        <p class="mb-0">Make sure you are on instagram.com</p>
+      </div>
+    </div>
+
+    <script src="/vendor/browser-polyfill.js"></script>
+    <script src="script.js"></script>
+    <script src="/vendor/bootstrap.js"></script>
+  </body>
+</html>

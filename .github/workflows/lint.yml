@@ -1,0 +1,22 @@
+name: Lint extension
+
+on:
+  push:
+  pull_request:
+    types: [ opened, reopened, synchronize ]
+
+jobs:
+  build:
+    name: Lint extension
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22.x"
+    - name: Install web-ext
+      run: npm install --global web-ext
+    - name: Lint extension
+      run: web-ext lint

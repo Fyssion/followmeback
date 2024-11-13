@@ -22,7 +22,7 @@ jobs:
     - name: Build extension
       run: web-ext build --artifacts-dir dist
     - name: Sign extension
-      run: web-ext sign --channel unlisted
+      run: web-ext sign --channel unlisted --artifacts-dir dist
       env:
         WEB_EXT_API_KEY: ${{ secrets.MOZILLA_API_KEY }}
         WEB_EXT_API_SECRET: ${{ secrets.MOZILLA_API_SECRET }}

@@ -1,46 +1,28 @@
-/**
- * Listen for clicks on the buttons, and send the appropriate message to
- * the content script in the page.
- */
 function listenForClicks() {
-    document.addEventListener("click", (e) => {
-      function detectFollowers(tabs) {
-        browser.tabs.sendMessage(tabs[0].id, {
-            command: "scrape-followers",
-        });
-      }
+    document.addEventListener("click", async (e) => {
+        if (e.target.tagName !== "BUTTON" || !e.target.closest("#followmeback")) {
+            return;
+        }
 
-      function detectFollowing(tabs) {
-        browser.tabs.sendMessage(tabs[0].id, {
-            command: "scrape-following",
-        });
-      }
+        try {
+            const tabs = await browser.tabs.query({active: true, currentWindow: true});
+            const tab = tabs[0];
 
-      /**
-       * Just log the error to the console.
-       */
-      function reportError(error) {
-        console.error(`Could not run: ${error}`);
-      }
-
-      /**
-       * Get the active tab,
-       */
-      if (e.target.tagName !== "BUTTON" || !e.target.closest("#followmeback")) {
-        // Ignore when click is not on a button within <div id="followmeback">.
-        return;
-      }
-      if (e.target.id === "detectFollowers") {
-        browser.tabs.query({active: true, currentWindow: true})
-          .then(detectFollowers)
-          .catch(reportError);
-      } else {
-        browser.tabs.query({active: true, currentWindow: true})
-          .then(detectFollowing)
-          .catch(reportError);
-      }
+            if (e.target.id === "detectFollowers") {
+                await browser.tabs.sendMessage(tab.id, {
+                    command: "scrape-followers"
+                });
+            } else {
+                await browser.tabs.sendMessage(tab.id, {
+                    command: "scrape-following"
+                });
+            }
+        } catch (error) {
+            console.error(`Could not run: ${error}`);
+        }
     });
-  }
+}
+
 
 
 function reportExecuteScriptError(raise, error) {
@@ -51,34 +33,13 @@ function reportExecuteScriptError(raise, error) {
         console.error(`Failed to execute content script: ${error.message}`);
     }
 }
+
+
 function unReportExecuteScriptError() {
     document.querySelector("#followmeback").classList.remove("hidden");
     document.querySelector("#followmeback-result").classList.remove("hidden");
     document.querySelector("#followmeback-error").classList.add("hidden");
 }
-
-browser.tabs.executeScript({file: "/vendor/browser-polyfill.js"});
-browser.tabs.executeScript({file: "/content_script.js"})
-.then(listenForClicks)
-.catch((e) => reportExecuteScriptError(true, e));
-
-// async function executeScript() {
-//     try {
-//         const tabs = await (typeof browser !== 'undefined' ?
-//             browser.tabs.executeScript({file: "/content_script.js"}) :
-//             new Promise((resolve, reject) => {
-//                 chrome.tabs.executeScript({file: "/content_script.js"}, (result) => {
-//                     chrome.runtime.lastError ? reject(chrome.runtime.lastError) : resolve(result);
-//                 });
-//             })
-//         );
-//         listenForClicks();
-//     } catch (error) {
-//         reportExecuteScriptError(error);
-//     }
-// }
-
-// document.addEventListener('DOMContentLoaded', executeScript);
 
 
 function updateList(elementId, usernames, defaultText) {
@@ -172,12 +133,46 @@ browser.runtime.onMessage.addListener(async (message) => {
         state.isInstagram = message.result;
         await setState(state);
         await updateUI(state);
-    } 
+    }
 });
 
+
+async function checkIfInstagram() {
+    const tabs = await browser.tabs.query({active: true, currentWindow: true});
+    const tab = tabs[0];
+    const isInstagram = tab.url.includes("instagram.com");
+    const state = await getState();
+    state.isInstagram = isInstagram;
+    await setState(state);
+    await updateUI(state);
+}
+
+
 document.addEventListener('DOMContentLoaded', async () => {
-    let tabs = await browser.tabs.query({active: true, currentWindow: true});
-    browser.tabs.sendMessage(tabs[0].id, {
-        command: "am-i-instagram",
-    });
+    try {
+        await checkIfInstagram();
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        await updateUI(await getState());
+    }
 });
+
+(async () => {
+    console.log('Here');
+    let tabs = await browser.tabs.query({active: true, currentWindow: true});
+    let tab = tabs[0];
+    console.log(tabs, tab);
+    try {
+        await browser.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ["/vendor/browser-polyfill.js"],
+        });
+        await browser.scripting.executeScript({
+            target:  { tabId: tab.id },
+            files: ["/content_script.js"],
+        });
+        listenForClicks();
+    } catch (e) {
+        reportExecuteScriptError(true, e);
+    }
+})();

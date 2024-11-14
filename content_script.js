@@ -1,4 +1,6 @@
 (function() {
+    console.log('I am here');
+
     if (window.hasRun) {
         return;
     }
@@ -29,7 +31,7 @@
         });
     }
 
-    browser.runtime.onMessage.addListener((message) => {
+    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.command === "scrape-followers") {
             scrape("followers");
         } else if (message.command === "scrape-following") {
@@ -38,5 +40,4 @@
             amInstagram();
         }
     });
-
 })();

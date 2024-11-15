@@ -16,3 +16,9 @@ and click on the xpi file.
 
 The extension has been tested on Chromium, but idk how to actually install it since I don't use Chrome.
 Feel free to add instructions in a PR if you figure it out.
+
+## Privacy Policy
+
+This extension does not collect user data.
+All information processing occurs strictly on-device,
+and no remote connections are made.
